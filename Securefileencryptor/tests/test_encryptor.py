@@ -7,12 +7,12 @@ class TestEncryption(unittest.TestCase):
     def setUp(self):
         self.test_file = "test_file.txt"
         self.encrypted_file = self.test_file + ".enc"
-        self.decrypted_file = "test_file_decrypted.txt"
+        self.decrypted_file = self.test_file + "_decrypted"
         self.password = "testpassword123"
         
         # Create a sample file for testing
         with open(self.test_file, "w") as f:
-            f.write("This is a test.")
+            f.write("This is a test nigger123.")
 
     def test_encryption_decryption(self):
         # Encrypt the file
@@ -22,6 +22,7 @@ class TestEncryption(unittest.TestCase):
         # Decrypt the file
         decrypt_file(self.encrypted_file, self.password)
         self.assertTrue(os.path.exists(self.decrypted_file))
+        
 
         # Verify contents match
         with open(self.test_file, "r") as f1, open(self.decrypted_file, "r") as f2:
@@ -37,3 +38,8 @@ class TestEncryption(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+
+#To run this test use this command in bash: 
+#python -m unittest tests.test_encryptor
