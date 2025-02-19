@@ -1,40 +1,34 @@
-from Crypto.Cipher import AES
 import os
-import hashlib
+import base64
+from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.backends import default_backend
 
 def encrypt_file(file_path, password):
-    """
-    Encrypts a file using AES-256 encryption.
-    :param file_path: Path to the file to be encrypted
-    :param password: User-provided password for encryption
-    """
-    try:
-        # Read the file data
-        with open(file_path, 'rb') as f:
-            data = f.read()
-        
-        # Derive a 32-byte encryption key from the password
-        key = hashlib.sha256(password.encode()).digest()
-        
-        # Create cipher object
-        cipher = AES.new(key, AES.MODE_EAX)
-        nonce = cipher.nonce
-        
-        # Encrypt data
-        ciphertext, tag = cipher.encrypt_and_digest(data)
-        
-        # Save the encrypted file
-        encrypted_file_path = file_path + ".enc"
-        with open(encrypted_file_path, 'wb') as f:
-            f.write(nonce + tag + ciphertext)
-        
-        print(f"File encrypted successfully: {encrypted_file_path}")
-    
-    except Exception as e:
-        print(f"Encryption failed: {e}")
+    salt = os.urandom(16)  # Generate random salt
+    kdf = PBKDF2HMAC(
+        algorithm=hashes.SHA256(),
+        length=32,
+        salt=salt,
+        iterations=100000,
+        backend=default_backend()
+    )
+    key = kdf.derive(password.encode())
 
-# Example usage
-if __name__ == "__main__":
-    file_to_encrypt = input("Enter the file path to encrypt: ")
-    user_password = input("Enter a password: ")
-    encrypt_file(file_to_encrypt, user_password)
+    iv = os.urandom(16)  # Generate a random IV
+    cipher = Cipher(algorithms.AES(key), modes.CBC(iv), backend=default_backend())
+    encryptor = cipher.encryptor()
+
+    with open(file_path, "rb") as f:
+        plaintext = f.read()
+
+    # Pad the plaintext to a multiple of 16 bytes
+    padding_length = 16 - (len(plaintext) % 16)
+    plaintext += bytes([padding_length]) * padding_length  # PKCS7 padding
+
+    ciphertext = encryptor.update(plaintext) + encryptor.finalize()
+
+    # Save salt, IV, and encrypted data together
+    with open(file_path + ".encrypted", "wb") as f:
+        f.write(salt + iv + ciphertext)

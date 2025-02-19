@@ -1,15 +1,9 @@
 import sys
 import os
-from PyQt6.QtGui import QIcon
-
 from PyQt6.QtWidgets import (
     QApplication, QWidget, QVBoxLayout, QLabel, QPushButton, QFileDialog, QLineEdit, QMessageBox
 )
-
-# Ensure Python can find encryption_tool
-sys.path.append(os.path.abspath(os.path.dirname(__file__)))
-
-# Corrected Import Paths
+from PyQt6.QtGui import QIcon
 from encryption_tool.encrypt import encrypt_file
 from encryption_tool.decrypt import decrypt_file
 
@@ -21,8 +15,7 @@ class FileEncryptorGUI(QWidget):
     def init_ui(self):
         self.setWindowTitle("Secure File Encryptor")
         self.setGeometry(400, 200, 400, 250)
-
-        self.setWindowIcon(QIcon("Securefileencryptor\assets\folder.png"))
+        self.setWindowIcon(QIcon("icon.png"))
 
         layout = QVBoxLayout()
 
